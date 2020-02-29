@@ -19,3 +19,18 @@ app.listen(3000);
  //Export module
  module.exports = app;
  ```
+
+## Exemplo de rota básica - GET
+**Com Arrow Function ES6**
+```
+app.get('/', (req,res) => {
+    return res.send({message: "Hello World Flatearth"})
+})
+```
+**Sem Arrow function**
+```
+app.get('/', (req,res) => {
+    return res.send({message: "Hello World Flatearth"})
+})
+```
+
