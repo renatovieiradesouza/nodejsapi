@@ -1,14 +1,3 @@
-# nodejsapi
-
-## Need Tools
-- Node JS
-
-
-## Need Packages
-- express
-
-## Estrutura básica de uma API
-```
 //Require lib express
 const express = require('express');
 const app = express();
@@ -18,5 +7,3 @@ app.listen(3000);
 
  //Export module
  module.exports = app;
- ```
- 
