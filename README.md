@@ -7,7 +7,7 @@
 ## Need Packages
 - express
 
-## Estrutura básica de uma API
+## Estrutura básica para iniciar sua API em NODE
 ```
 //Require lib express
 const express = require('express');
@@ -19,4 +19,3 @@ app.listen(3000);
  //Export module
  module.exports = app;
  ```
- 
