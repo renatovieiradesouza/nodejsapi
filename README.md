@@ -34,3 +34,25 @@ app.get('/', (req,res) => {
 })
 ```
 
+## Rota com params query na URL
+```
+//Rota teste - GET com query - parâmentros vindo na URL (/?)
+app.get('/', (req,res) => {
+    let obj = req.query;
+    return res.send({message: `Hello World Flat earth - GET | Seu nome é: ${obj.nome}, sua idade é: ${obj.idade} anos`})
+})
+```
+
+## Direcionar cada rota para um determinado arquivo, assim trabalhamos isolados, cada rota tem seu arquivo
+```
+//Instanciando arquivos de rotas
+const indexRoute = require('./routes/index');
+```
+
+```
+//Direcionando as rotas para seus respectivos arquivos
+app.user('/', indexRoute);
+```
+
+**No arquivo da rota index, fazemos:**
+

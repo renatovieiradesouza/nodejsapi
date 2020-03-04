@@ -2,15 +2,13 @@
 const express = require('express');
 const app = express();
 
-//Rota teste - GET
-app.get('/', (req,res) => {
-    return res.send({message: "Hello World Flat earth - GET"})
-})
+//Instanciando arquivos de rotas
+const indexRoute = require('./routes/index');
+const usersRoute = require('./routes/users');
 
-//Rota teste - POST
-app.post('/', (req,res) => {
-    return res.send({message: "Hello World Globe earth - POST"})
-})
+//Direcionando as rotas para seus respectivos arquivos
+app.use('/', indexRoute);
+app.use('/users', usersRoute);
 
 //Listen port
 app.listen(3000);
