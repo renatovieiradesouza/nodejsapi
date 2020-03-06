@@ -9,7 +9,8 @@ const bodyParser = require('body-parser');
 //Url banco
 const url = 'mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority';
 //Opções padrões para conexão com banco de dados
-const options = { poolSize: 5, useUnifiedTopology: true,  useNewUrlParser: true}; //Usando useUnifiedTopology não precisa mais passar os parâmetros de reconexão e retry, td está incorporato no useUnifiedTopology
+//Usando useUnifiedTopology não precisa mais passar os parâmetros de reconexão e retry, td está incorporato no useUnifiedTopology
+const options = { poolSize: 5, useUnifiedTopology: true,  useNewUrlParser: true}; 
 
 //Conexão
 mongoose.connect(url, options);

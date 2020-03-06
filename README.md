@@ -56,3 +56,4 @@ app.user('/', indexRoute);
 
 **No arquivo da rota index, fazemos:**
 
+## Criando um model  para API
