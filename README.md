@@ -100,3 +100,6 @@ router.post('/create', (req,res) => {
 });
 ```
 
+## Instalar o mongoose para gerenciar mongoDB
+**No terminal:** digite: npm install mongoose --save
+**No terminal:** digite: npm install body-parser --save
