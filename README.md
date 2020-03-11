@@ -103,3 +103,72 @@ router.post('/create', (req,res) => {
 ## Instalar o mongoose para gerenciar mongoDB
 **No terminal:** digite: npm install mongoose --save
 **No terminal:** digite: npm install body-parser --save
+
+
+
+
+## Para criar um Schema (model) da sua tabela (no-sql), usamos o mongoose, veja um exemplo de como criar a mesma
+**crie uma pasta model e dentro da mesma crie o arquivo users.js**
+
+No arquivo coloque:
+
+```
+//GET Usuários - find all
+router.get('/', (req,res) => {
+    Users.find({}, (err, data) => {
+        if(err) return res.send({ error: `Erro na consulta de usuários` });
+        return res.send(data);
+    });
+});
+```
+
+Reparem que após o **find**, temos {}, é para pegar todos os registros, e dentro de find ainda temos **err, data** que serão nossos objetos de retorno, seja em caso
+de sucesso como de erro.
+
+## Vamos criar um POST para criar usuários
+**no arquivo users.js**
+
+## Desestruturação
+Com essa possibilidade, você não precisa ficar chamando obj.nome para tudo, veja:
+**Sem desestruturação**
+```
+const obj = req.body;
+if(!obj.email || !obj.password) {
+    return res.send({ error: `Dados insuficientes!` });
+}
+```
+**Com Desestruturação**
+```
+const { email, password } = req.body;
+if(!email || !password) {
+    return res.send({ error: `Dados insuficientes!` })
+}
+```
+
+**Reduzindo código com a maestria do JS**
+ ```
+ Users.findOne({email: email}); //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
+ ```
+
+## Criando usuario com POST
+**Usando apenas o req.body para criar o usuário, mas vc poderia usar -> email: email, password: password, como o que vamos receber é somente email e password, podemos usar o req.body, se viesse mais dados dentrod o body, não seria possível usar req.body e sim email: email, password: password
+```
+//POST Criação de usuario
+router.post('/create', (req,res) => {
+    const { email, password } = req.body;
+    if(!email || !password) return res.send({ error: `Dados insuficientes!`});
+    
+    //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
+    Users.findOne({email}, (err, data) => {
+        //Valida erro
+        if (err) return res.send({ error: `E-mail não encontrado!` });
+        //Valida se já existe
+        if (data) return res.send({ error: `E-mail já existe na base!` });
+        //Cria usuário usando apenas o req.body
+        Users.create(req.body, (err,data) => {
+            if(err) return res.send({ error: `Erro ao criar usuario: ` + err });
+            return res.send(data);
+        });
+    });
+});
+
