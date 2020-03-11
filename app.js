@@ -38,10 +38,12 @@ app.use(bodyParser.json());
 //Import rotas
 const indexRoute = require('./routes/index');
 const usersRoute = require('./routes/users');
+const bebidasRoute = require('./routes/bebidas');
 
 //Associar rota ao app
 app.use('/', indexRoute);
 app.use('/users', usersRoute);
+app.use('/bebidas', bebidasRoute);
 
 //Listen port
 app.listen(3000);
