@@ -108,10 +108,25 @@ router.post('/create', (req,res) => {
 
 
 ## Para criar um Schema (model) da sua tabela (no-sql), usamos o mongoose, veja um exemplo de como criar a mesma
-**crie uma pasta model e dentro da mesma crie o arquivo users.js**
+**crie uma pasta model e dentro da mesma crie o arquivo user.js**
 
 No arquivo coloque:
 
+```
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const UserSchema = new Schema({
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true, select: false },
+    created: { type: Date, default: Date.now }
+});
+
+
+module.exports = mongoose.model('User', UserSchema);
+```
+
+**Rota do User**
 ```
 //GET Usuários - find all
 router.get('/', (req,res) => {
@@ -137,7 +152,9 @@ if(!obj.email || !obj.password) {
     return res.send({ error: `Dados insuficientes para processar sua requisição!!` });
 }
 ```
+
 **Com Desestruturação**
+
 ```
 const { email, password } = req.body;
 if(!email || !password) {
@@ -146,11 +163,18 @@ if(!email || !password) {
 ```
 
 **Reduzindo código com a maestria do JS**
+
  ```
- Users.findOne({email: email}); //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
+ Users.findOne({email: email}); 
+ 
+ //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
+
+ Users.findOne({email});
  ```
 
+
 ## Criando usuario com POST
+
 **Usando apenas o req.body para criar o usuário, mas vc poderia usar -> email: email, password: password, como o que vamos receber é somente email e password, podemos usar o req.body, se viesse mais dados dentrod o body, não seria possível usar req.body e sim email: email, password: password
 ```
 //POST Criação de usuario
@@ -175,6 +199,7 @@ router.post('/create', (req,res) => {
 ## Processo para criar uma API básica
 
 **Configurar sua rota**
+
 Considerando que app.js seja chamado, vamos precisar no minimo ter isso nele:
 
 ```
