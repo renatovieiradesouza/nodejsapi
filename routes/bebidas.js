@@ -14,9 +14,10 @@ router.get('/', (req,res) => {
 
 //POST Criação de Bebida
 router.post('/create', (req,res) => {
+    //Modelo desestruturado
     const { nome, codigo, qtd, valor, tamanho, foto, categoriaId } = req.body;
 
-    if(!nome || !codigo || !qtd || !valor || !tamanho || !foto || !categoriaId) return res.send({ error: `Dados insuficientes!` });
+    if(!nome || !codigo || !qtd || !valor || !tamanho || !foto || !categoriaId) return res.send({ error: `Dados insuficientes para processar sua requisição!!` });
 
     Bebidas.findOne({codigo}, (err,data) => {
         //Valida erro

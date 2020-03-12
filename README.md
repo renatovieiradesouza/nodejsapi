@@ -134,14 +134,14 @@ Com essa possibilidade, você não precisa ficar chamando obj.nome para tudo, ve
 ```
 const obj = req.body;
 if(!obj.email || !obj.password) {
-    return res.send({ error: `Dados insuficientes!` });
+    return res.send({ error: `Dados insuficientes para processar sua requisição!!` });
 }
 ```
 **Com Desestruturação**
 ```
 const { email, password } = req.body;
 if(!email || !password) {
-    return res.send({ error: `Dados insuficientes!` })
+    return res.send({ error: `Dados insuficientes para processar sua requisição!!` })
 }
 ```
 
@@ -156,7 +156,7 @@ if(!email || !password) {
 //POST Criação de usuario
 router.post('/create', (req,res) => {
     const { email, password } = req.body;
-    if(!email || !password) return res.send({ error: `Dados insuficientes!`});
+    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!!`});
     
     //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
     Users.findOne({email}, (err, data) => {
@@ -171,4 +171,120 @@ router.post('/create', (req,res) => {
         });
     });
 });
+```
+## Processo para criar uma API básica
+
+**Configurar sua rota**
+Considerando que app.js seja chamado, vamos precisar no minimo ter isso nele:
+
+```
+//Require lib express
+const express = require('express');
+const app = express();
+
+//Instanciando mongoose - modelagem banco mongo
+const mongoose = require('mongoose');
+//Instanciando body-parser - trabalha com body nas requisições
+const bodyParser = require('body-parser');
+
+//Dados conexão Mongo
+const url = 'mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority'
+
+//Options default do banco
+const options = { poolSize: 5, useNewUrlParser: true, useUnifiedTopology: true };
+
+//Conexão Mongo
+mongoose.connect(url,options);
+mongoose.set('useCreateIndex', true);
+
+//Tratamento de exceções do banco
+mongoose.connection.on('error', (err) => {
+    console.log('Erro na conexão com o banco de dados: ', + err);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('Aplicação desconectada do banco de dados.');
+})
+
+mongoose.connection.on('connected', () => {
+    console.log('Aplicação conectada com sucesso!');
+})
+
+//Body Parser config
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+//Import rotas
+const usersRoute = require('./routes/users');
+
+//Associar rota ao app
+app.use('/', userRoute);
+
+//Listen port
+app.listen(3000);
+
+ //Export module
+ module.exports = app;
+```
+
+**Criar um Model**
+
+Temos a rota User configurada em app.js, agora vamos ao Model da mesma:
+
+```
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const UserSchema = new Schema({
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true, select: false },
+    created: { type: Date, default: Date.now }
+});
+
+
+module.exports = mongoose.model('User', UserSchema);
+```
+
+**Criar uma Rota**
+
+Vamos agora definir o que será feito na rota User, sendo que iremos ter aqui apenas um GET e um POST
+
+```
+const express = require('express');
+const router = express.Router();
+
+//Model
+const Users = require('../model/user');
+
+//GET Usuários - find all
+router.get('/', (req,res) => {
+    Users.find({}, (err, data) => {
+        if(err) return res.send({ error: `Erro na consulta de usuários` });
+        return res.send(data);
+    });
+});
+
+//POST Criação de usuario
+router.post('/create', (req,res) => {
+    //Modelo desestruturado
+    const { email, password } = req.body;
+    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!!`});
+    
+    //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
+    Users.findOne({email}, (err, data) => {
+        //Valida erro
+        if (err) return res.send({ error: `Erro ao processar sua requisição!` });
+        //Valida se já existe
+        if (data) return res.send({ error: `E-mail já existe na base!` });
+        //Cria usuário usando apenas o req.body, mas vc poderia usar email: email, password: password, como o que vamos receber é somente email e password, podemos usar o req.body
+        Users.create(req.body, (err,data) => {
+            if(err) return res.send({ error: `Erro ao criar usuario: ` + err });
+            data.password = undefined; //Remove a senha do retorno para o cliente
+            return res.send(data);
+        });
+    });
+});
+
+module.exports = router;
+```
 

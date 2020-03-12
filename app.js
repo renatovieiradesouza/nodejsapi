@@ -39,11 +39,13 @@ app.use(bodyParser.json());
 const indexRoute = require('./routes/index');
 const usersRoute = require('./routes/users');
 const bebidasRoute = require('./routes/bebidas');
+const categoriaRoute = require('./routes/categorias');
 
 //Associar rota ao app
 app.use('/', indexRoute);
 app.use('/users', usersRoute);
 app.use('/bebidas', bebidasRoute);
+app.use('/categoria', categoriaRoute);
 
 //Listen port
 app.listen(3000);
