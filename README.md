@@ -126,22 +126,8 @@ const UserSchema = new Schema({
 module.exports = mongoose.model('User', UserSchema);
 ```
 
-**Rota do User**
-```
-//GET Usuários - find all
-router.get('/', (req,res) => {
-    Users.find({}, (err, data) => {
-        if(err) return res.send({ error: `Erro na consulta de usuários` });
-        return res.send(data);
-    });
-});
-```
-
 Reparem que após o **find**, temos {}, é para pegar todos os registros, e dentro de find ainda temos **err, data** que serão nossos objetos de retorno, seja em caso
 de sucesso como de erro.
-
-## Vamos criar um POST para criar usuários
-**no arquivo users.js**
 
 ## Desestruturação
 Com essa possibilidade, você não precisa ficar chamando obj.nome para tudo, veja:
@@ -173,7 +159,8 @@ if(!email || !password) {
  ```
 
 
-## Criando usuario com POST
+## Vamos criar um POST para criar usuários
+**no arquivo users.js**
 
 **Usando apenas o req.body para criar o usuário, mas vc poderia usar -> email: email, password: password, como o que vamos receber é somente email e password, podemos usar o req.body, se viesse mais dados dentrod o body, não seria possível usar req.body e sim email: email, password: password
 ```
@@ -313,3 +300,4 @@ router.post('/create', (req,res) => {
 module.exports = router;
 ```
 
+## Configurando bcrypt
