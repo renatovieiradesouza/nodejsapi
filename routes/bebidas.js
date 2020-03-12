@@ -20,9 +20,9 @@ router.post('/create', (req,res) => {
 
     Bebidas.findOne({codigo}, (err,data) => {
         //Valida erro
-        if (err) return res.send({ error: `E-mail não encontrado!` });
+        if (err) return res.send({ error: `Bebida não encontrado!` });
         //Valida se já existe
-        if (data) return res.send({ error: `E-mail já existe na base!` });
+        if (data) return res.send({ error: `Bebida já existe na base!` });
         //Cria bebida
         Bebidas.create(req.body, (err,data) => {
             if(err) return res.send({ error: `Erro ao criar bebida: ` + err });
