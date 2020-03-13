@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 let validaEmail = require('email-validator');
+const bcrypt = require('bcrypt');
 
 //Model
 const Users = require('../model/user');
@@ -17,7 +18,7 @@ router.get('/', (req,res) => {
 router.post('/create', (req,res) => {
     //Modelo desestruturado
     const { email, password } = req.body;
-    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!!`});
+    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!`});
     
     //Valida e-mail
     if(!validaEmail.validate(email)) return res.send({ erro: `E-mail inválido!` });
@@ -35,6 +36,29 @@ router.post('/create', (req,res) => {
             return res.send(data);
         });
     });
+});
+
+router.post('/auth', (req,res) => {
+    //Modelo desestruturado
+    const { email, password } = req.body;
+    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!` });
+
+    //Valida e-mail
+    if(!validaEmail.validate(email)) return res.send({ erro: `E-mail inválido!` });
+
+    //Auth
+    Users.findOne({email}, (err,data) => {
+        //Valida erro
+        if(err) return res.send({ error: `Erro ao processar sua requisição!` });
+        //Valida se tem usuário
+        if(!data) return res.send({ error: `Erro ao processar sua requisição!` });
+        //Comparando senhas
+        bcrypt.compare(password, data.password, (err,same) => {
+            if(!same) return res.send({ error: `Erro ao processar sua requisição!`});
+            data.password = undefined;
+            return res.send(data);
+        });
+    }).select('password'); //Isso é devido no model termos marcado o password como select: false, para não exibir, com isso, forçamos ele a trazer de volta o password para essa função
 });
 
 module.exports = router;

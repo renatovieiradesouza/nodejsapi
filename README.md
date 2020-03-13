@@ -300,4 +300,31 @@ router.post('/create', (req,res) => {
 module.exports = router;
 ```
 
-## Configurando bcrypt
+## Configurando bcrypt para criptografar campo password
+
+Antes de qualquer coisa, instale a lib no seu projeto:
+npm install bcrypt --save
+
+Importe a lib no seu arquivo da rota de Users:
+
+```
+const bcrypt = require('bcrypt');
+
+//Vamos configurar um evento pré save, que ocorre antes do user ser criado, vejamos:
+UserSchema.pre('save', function (next) { 
+    let user = this;
+    //Valida se teve modificação no campo password, caso não ele continua sem encriptar
+    if(!user.isModified('password')) return next();
+    //Se passar, ele vai usar o bcrypt
+    bcrypt.hash(user.password, 10, (err,encrypted) => {
+        user.password = encrypted;
+        return next();
+    })
+});
+```
+
+Isso já o suficiente para encriptar sua senha com bcrypt
+
+## Autenticar usuário (POST) com Bcrypt
+
+
