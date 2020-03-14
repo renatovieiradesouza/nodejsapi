@@ -7,15 +7,18 @@ const bcrypt = require('bcrypt');
 const Users = require('../model/user');
 
 //GET Usuários - find all
-router.get('/', (req,res) => {
-    Users.find({}, (err, data) => {
-        if(err) return res.send({ error: `Erro na consulta de usuários` });
-        return res.send(data);
-    });
+//Usando async await para garantir retorno
+router.get('/',  async (req,res) => {
+    try {
+        const users = await Users.find({});
+        return res.send(users);
+    }
+    catch (err) {
+        return res.send({ error: `Erro na consula de usuário` });
+    }
 });
 
-//POST Criação de usuario
-router.post('/create', (req,res) => {
+router.post('/create', async (req,res) => {
     //Modelo desestruturado
     const { email, password } = req.body;
     if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!`});
@@ -23,22 +26,19 @@ router.post('/create', (req,res) => {
     //Valida e-mail
     if(!validaEmail.validate(email)) return res.send({ erro: `E-mail inválido!` });
     
-    //Caso a propriedade e o valor buscado tem os mesmos nomes, como aqui, basta colocar um valor, o JS já resolve pra vc
-    Users.findOne({email}, (err, data) => {
-        //Valida erro
+    try {
+
+        if(await Users.findOne({ email })) return res.send({ error: `Usuário já existe` });
+        const user = await Users.create(req.body);
+        user.password = undefined;
+        return res.send(user);
+
+    } catch (err) {
         if (err) return res.send({ error: `Erro ao processar sua requisição!` });
-        //Valida se já existe
-        if (data) return res.send({ error: `E-mail já existe na base!` });
-        //Cria usuário usando apenas o req.body, mas vc poderia usar email: email, password: password, como o que vamos receber é somente email e password, podemos usar o req.body
-        Users.create(req.body, (err,data) => {
-            if(err) return res.send({ error: `Erro ao criar usuario: ` + err });
-            data.password = undefined; //Remove a senha do retorno para o cliente
-            return res.send(data);
-        });
-    });
+    }
 });
 
-router.post('/auth', (req,res) => {
+router.post('/auth', async (req,res) => {
     //Modelo desestruturado
     const { email, password } = req.body;
     if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!` });
@@ -46,19 +46,21 @@ router.post('/auth', (req,res) => {
     //Valida e-mail
     if(!validaEmail.validate(email)) return res.send({ erro: `E-mail inválido!` });
 
-    //Auth
-    Users.findOne({email}, (err,data) => {
-        //Valida erro
+    try {
+
+        const user = await Users.findOne({ email }).select('+password');
+        if(!user) return res.send({ error: `Usuário não registrado` });
+
+        const pass_ok = await bcrypt.compare(password,user.password);
+        //Login inválido
+        if(!pass_ok) return res.send({ error:  `Erro ao processar sua requisição!` });
+        //Login válido
+        user.password = undefined;
+        return res.send({ email: email, sessaoLogin: "45541005ds05w540450450sd4s50", fotoUrl: "http://url.google.com.br/firebase", uid: "11454587474w74ww4e7d"});
+
+    } catch (err) {
         if(err) return res.send({ error: `Erro ao processar sua requisição!` });
-        //Valida se tem usuário
-        if(!data) return res.send({ error: `Erro ao processar sua requisição!` });
-        //Comparando senhas
-        bcrypt.compare(password, data.password, (err,same) => {
-            if(!same) return res.send({ error: `Erro ao processar sua requisição!`});
-            data.password = undefined;
-            return res.send(data);
-        });
-    }).select('password'); //Isso é devido no model termos marcado o password como select: false, para não exibir, com isso, forçamos ele a trazer de volta o password para essa função
+    }
 });
 
 module.exports = router;

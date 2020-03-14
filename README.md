@@ -328,3 +328,69 @@ Isso já o suficiente para encriptar sua senha com bcrypt
 ## Autenticar usuário (POST) com Bcrypt
 
 
+No Model nós precisamos configurar o evento  pre save para encriptar a senha antes da mesma
+ser salva, veja como fica nosso Model de User:
+
+```
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const bcrypt = require('bcrypt');
+
+const UserSchema = new Schema({
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true, select: false },
+    created: { type: Date, default: Date.now }
+});
+
+//Pre save para encriptar senha
+//Não use função de seta (arrow function) nesse caso, pois o this trabalha de maneira de diferente e não deria certo para esse objetivo
+UserSchema.pre('save', async function (next) { 
+    let user = this;
+    //Valida se teve modificação no campo password, caso não ele continua sem encriptar
+    if(!user.isModified('password')) return next();
+
+    //Se passar, ele vai usar o bcrypt
+    user.password = await bcrypt.hash(user.password, 10);
+    return next();
+});
+
+module.exports = mongoose.model('User', UserSchema);
+```
+
+**Precisamos autenticar com a senha alterada, vamos criar o método endpoint AUTH)**
+
+Basicamente precisamos comparar a a senshaa recebida com a senha no banco, algo como:
+```
+bcrypt.compare(password,user.password);
+```
+
+Nosso Método completo de  auth na rota User:
+
+```
+router.post('/auth', async (req,res) => {
+    //Modelo desestruturado
+    const { email, password } = req.body;
+    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!` });
+
+    //Valida e-mail
+    if(!validaEmail.validate(email)) return res.send({ erro: `E-mail inválido!` });
+
+    try {
+
+        const user = await Users.findOne({ email }).select('+password');
+        if(!user) return res.send({ error: `Usuário não registrado` });
+
+        const pass_ok = await bcrypt.compare(password,user.password);
+        //Login inválido
+        if(!pass_ok) return res.send({ error:  `Erro ao processar sua requisição!` });
+        //Login válido
+        user.password = undefined;
+        return res.send({ email: email, sessaoLogin: "45541005ds05w540450450sd4s50", fotoUrl: "http://url.google.com.br/firebase", uid: "11454587474w74ww4e7d"});
+
+    } catch (err) {
+        if(err) return res.send({ error: `Erro ao processar sua requisição!` });
+    }
+});
+```
+
+
