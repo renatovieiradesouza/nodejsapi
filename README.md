@@ -497,3 +497,13 @@ router.post('/auth', token, async (req,res) => {
     }
 });
 ```
+
+
+## Como adicionar statusCode a suas respostas
+
+Simples, vejamos:
+Nos seus retornos, adicione statu(code)
+```
+ return res.status(201).send({user, token: createUserToken(user.id)});
+```
+
