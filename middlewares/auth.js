@@ -8,6 +8,7 @@ const token = (req,res, next) => {
 
     jwt.verify(token_header, 'sarah', (err, decoded) => {
         if(err) return res.send({ error: `Token inválido` });
+        res.locals.auth_data = decoded;
         return next();
     });
 }

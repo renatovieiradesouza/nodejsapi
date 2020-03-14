@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-let validaEmail = require('email-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const token = require('../middlewares/auth');
+let validaEmail = require('email-validator');
 
 //Funcoes auxiliares
 const createUserToken = (userId) => {
@@ -14,7 +15,7 @@ const Users = require('../model/user');
 
 //GET Usuários - find all
 //Usando async await para garantir retorno
-router.get('/',  async (req,res) => {
+router.get('/', token,  async (req,res) => {
     try {
         const users = await Users.find({});
         return res.send(users);
@@ -24,7 +25,7 @@ router.get('/',  async (req,res) => {
     }
 });
 
-router.post('/create', async (req,res) => {
+router.post('/create', token, async (req,res) => {
     //Modelo desestruturado
     const { email, password } = req.body;
     if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!`});
@@ -44,7 +45,7 @@ router.post('/create', async (req,res) => {
     }
 });
 
-router.post('/auth', async (req,res) => {
+router.post('/auth', token, async (req,res) => {
     //Modelo desestruturado
     const { email, password } = req.body;
     if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!` });

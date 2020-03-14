@@ -394,3 +394,106 @@ router.post('/auth', async (req,res) => {
 ```
 
 
+## Adicionando autenticação JWT
+
+Vamos adiciconar a lib jsonwebtoken, então instale: npm i jsonwebtoken --save
+
+Basicamente você precisa configurar uma função para fazer a autentição JWT, vejamos abaixo:
+
+Antes importe a lib:
+
+```
+const jwt = require('jsonwebtoken);
+```
+
+Vamos a função:
+
+```
+//Funcoes auxiliares
+const createUserToken = (userId) => {
+    return jwt.sign({ id: userId}, 'senha_autenticacao', { expiresIn: '7d'});
+}
+```
+
+Após importar e criar a função, você pode criar seus tokens JWT, vamos escolher o endpoint '/create', vejamos:
+
+Apenas adicione o novo atributo token, poderia ser qualquer coisa e chame a funçao usando como parâmetro o ID do usuário, vejamos:
+
+```
+return res.send({user, token: createUserToken(user.id)});
+```
+
+O retorno seria algo como:
+
+```
+{
+    "user": {
+        "_id": "5e6d234271607938c0405f45",
+        "email": "testando123@ig.com.br",
+        "created": "2020-03-14T18:32:34.943Z",
+        "__v": 0
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNmQyMzQyNzE2MDc5MzhjMDQwNWY0NSIsImlhdCI6MTU4NDIxMDc1NSwiZXhwIjoxNTg0ODE1NTU1fQ.cEXI4YpZjUfuPlLTEjPQJv0Qnv2a486qu5XgJs3pvC4"
+}
+```
+
+## Como validar esse token nas minhas requisições
+
+Vamos criar uma pasta na raiz, chamada middlewares e dentro dela o arquivo auth.js, nesse arquivo, vamos adicionar:
+
+```
+const jwt = require('jsonwebtoken');
+
+const token = (req,res, next) => {
+    //Valida que será necessário vir um header chamado token
+    const token_header = req.headers.token;
+
+    //Valida se tem token válido na request
+    if(!token_header) return res.send({ error: `Token não enviado!` });
+
+    //Caso seja válido, decodifica o token com a senha e valida
+    jwt.verify(token_header, 'senha_autenticacao', (err, decoded) => {
+        if(err) return res.send({ error: `Token inválido` });
+        //Retorna os dados de quem gerou o token, nesse caso o id
+        res.locals.auth_data = decoded;
+        return next();
+    });
+}
+
+module.exports = token;
+```
+
+Importe esse arquivo na rota Users e vamos adicionar a validação de token no endpoint auth, vejamos:
+Repare que apenas adicionei a palavra **token**, nesse caso a constante que usamos para importar o middleware: 
+
+```
+//Repare no nome da constante
+const token = require('../middlewares/auth');
+```
+
+```
+router.post('/auth', token, async (req,res) => {
+    //Modelo desestruturado
+    const { email, password } = req.body;
+    if(!email || !password) return res.send({ error: `Dados insuficientes para processar sua requisição!` });
+
+    //Valida e-mail
+    if(!validaEmail.validate(email)) return res.send({ erro: `E-mail inválido!` });
+
+    try {
+
+        const user = await Users.findOne({ email }).select('+password');
+        if(!user) return res.send({ error: `Usuário não registrado` });
+
+        const pass_ok = await bcrypt.compare(password,user.password);
+        //Login inválido
+        if(!pass_ok) return res.send({ error:  `Erro ao processar sua requisição!` });
+        //Login válido
+        user.password = undefined;
+        return res.send({ email: email, fotoUrl: "http://url.google.com.br/firebase", uid: "11454587474w74ww4e7d",  token: createUserToken(user.id)});
+
+    } catch (err) {
+        if(err) return res.send({ error: `Erro ao processar sua requisição!` });
+    }
+});
+```
