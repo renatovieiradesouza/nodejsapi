@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const token = require('../middlewares/auth');
 
 //Rota teste - GET
-router.get('/', (req,res) => {
-    return res.send({message: "Hello index raiz - GET"})
+router.get('/', token, (req,res) => {
+    return res.send({message: "Rota privada"})
 });
 
 //Rota teste - POST

@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 let validaEmail = require('email-validator');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+//Funcoes auxiliares
+const createUserToken = (userId) => {
+    return jwt.sign({ id: userId}, 'sarah', { expiresIn: '7d'});
+}
 
 //Model
 const Users = require('../model/user');
@@ -31,7 +37,7 @@ router.post('/create', async (req,res) => {
         if(await Users.findOne({ email })) return res.send({ error: `Usuário já existe` });
         const user = await Users.create(req.body);
         user.password = undefined;
-        return res.send(user);
+        return res.send({user, token: createUserToken(user.id)});
 
     } catch (err) {
         if (err) return res.send({ error: `Erro ao processar sua requisição!` });
@@ -56,7 +62,7 @@ router.post('/auth', async (req,res) => {
         if(!pass_ok) return res.send({ error:  `Erro ao processar sua requisição!` });
         //Login válido
         user.password = undefined;
-        return res.send({ email: email, sessaoLogin: "45541005ds05w540450450sd4s50", fotoUrl: "http://url.google.com.br/firebase", uid: "11454587474w74ww4e7d"});
+        return res.send({ email: email, fotoUrl: "http://url.google.com.br/firebase", uid: "11454587474w74ww4e7d",  token: createUserToken(user.id)});
 
     } catch (err) {
         if(err) return res.send({ error: `Erro ao processar sua requisição!` });
