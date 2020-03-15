@@ -1,51 +1,59 @@
 //Require lib express
 const express = require('express');
 const app = express();
+const config = require('./config/config');
 
-//Mongoose
+//Instanciando mongoose - modelagem banco mongo
 const mongoose = require('mongoose');
-//BodyParser
+//Instanciando body-parser - trabalha com body nas requisições
 const bodyParser = require('body-parser');
-//Url banco
-const url = 'mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority';
-//Opções padrões para conexão com banco de dados
-//Usando useUnifiedTopology não precisa mais passar os parâmetros de reconexão e retry, td está incorporato no useUnifiedTopology
-const options = { poolSize: 5, useUnifiedTopology: true,  useNewUrlParser: true}; 
 
-//Conexão
-mongoose.connect(url, options);
-//Remove alerta mongoose
+//Dados conexão Mongo
+const url = config.bd_url_mongo;
+//const url = 'mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority'
+
+//Options default do banco
+const options = { poolSize: 5, useNewUrlParser: true, useUnifiedTopology: true };
+
+//Conexão Mongo
+mongoose.connect(url,options);
 mongoose.set('useCreateIndex', true);
 
-//Verifica se houve erro e imprime no console
+//Tratamento de exceções do banco
 mongoose.connection.on('error', (err) => {
-    console.log(`Erro na conexão com o banco de dados ${err}`);
-})
+    console.log('Erro na conexão com o banco de dados: ', + err);
+});
 
-//Verifica se houve desconexão e imprime no console
 mongoose.connection.on('disconnected', () => {
-    console.log(`Aplicação desconectada do banco de dados`);
+    console.log('Aplicação desconectada do banco de dados.');
 })
 
-//Verifica conexão com sucesso
 mongoose.connection.on('connected', () => {
-    console.log(`Aplicação conectada com sucesso ao banco de dados!`);
+    console.log('Aplicação conectada com sucesso!');
 })
 
-//Configurando bodyParser
-app.use(bodyParser.urlencoded({ extended: false}));
+//Body Parser config
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//Instanciando arquivos de rotas
+
+//Import rotas
 const indexRoute = require('./routes/index');
 const usersRoute = require('./routes/users');
+const bebidasRoute = require('./routes/bebidas');
+const categoriaRoute = require('./routes/categorias');
 
-//Direcionando as rotas para seus respectivos arquivos
+//Associar rota ao app
 app.use('/', indexRoute);
 app.use('/users', usersRoute);
+app.use('/bebidas', bebidasRoute);
+app.use('/categoria', categoriaRoute);
 
 //Listen port
 app.listen(3000);
 
  //Export module
  module.exports = app;
+
+
+ //mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority

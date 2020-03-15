@@ -1,18 +1,16 @@
-//Require lib express
 const express = require('express');
-
-//Require lib de rotas
 const router = express.Router();
+const token = require('../middlewares/auth');
 
-//Criando endpoints
-//GET
-router.get('/', (req,res) => {
-    return res.send({message: `Olá, eu sou um GET em /`});
-})
-//POST
+//Rota teste - GET
+router.get('/', token, (req,res) => {
+//Usando res.locals.auth_data para retornar dados do token, nesse caso o id
+    return res.send({message: "Rota privada", exclusivo: res.locals.auth_data});
+});
+
+//Rota teste - POST
 router.post('/', (req,res) => {
-    return res.send({message: `Olá, eu sou um POST em /`});
-})
+    return res.send({message: "Hello index raiz - POST"})
+});
 
-//Export router
 module.exports = router;
