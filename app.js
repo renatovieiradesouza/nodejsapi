@@ -1,6 +1,7 @@
 //Require lib express
 const express = require('express');
 const app = express();
+const config = require('./config/config');
 
 //Instanciando mongoose - modelagem banco mongo
 const mongoose = require('mongoose');
@@ -8,7 +9,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 //Dados conexão Mongo
-const url = 'mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority'
+const url = config.bd_url_mongo;
+//const url = 'mongodb+srv://renato:Sat3t3ll@clusterapinodejscourse-qhdd3.mongodb.net/test?retryWrites=true&w=majority'
 
 //Options default do banco
 const options = { poolSize: 5, useNewUrlParser: true, useUnifiedTopology: true };

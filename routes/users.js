@@ -4,10 +4,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const token = require('../middlewares/auth');
 let validaEmail = require('email-validator');
+const config = require('../config/config');
 
 //Funcoes auxiliares
 const createUserToken = (userId) => {
-    return jwt.sign({ id: userId}, 'sarah', { expiresIn: '7d'});
+    return jwt.sign({ id: userId}, config.passwd_json, { expiresIn: config.jwt_expires_in});
 }
 
 //Model
